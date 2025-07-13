@@ -1,0 +1,57 @@
+:root {
+  font-size: 16px;
+  --carrot-orange: #b7513c;
+  --leaf-green: #379351;
+  --wing-brown: #5c2c22;
+  --sky-blue: #d5f8f8;
+  --accent-pink: #b1325e;
+  --cloud-white: #eeeeee;
+  --rabbit-gray: #aaaaaa;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  margin: 10px;
+}
+
+#input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#user-input {
+  height: 30px;
+  border: 1px solid var(--carrot-orange);
+  border-radius: 5px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+#submit-button {
+  height: 30px;
+  width: 60px;
+  background-color: var(--carrot-orange);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#user-input:focus {
+  outline: none;
+}
+
+#submit-button:hover {
+  background-color: var(--accent-pink);
+}
