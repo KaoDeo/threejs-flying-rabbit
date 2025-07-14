@@ -11,7 +11,9 @@ import { shadowSupport, randomIntFromInterval } from "../utils/helpers.js";
 export class Cloud {
   constructor(config) {
     this.mesh = new Group();
-    this.speed = 0.8;
+
+    this.speed = config.speed || 0.5 + Math.random() * 0.7;
+
     this.delay = (config.delay || 0) * 60;
     this.delayCounter = 0;
 
@@ -20,6 +22,9 @@ export class Cloud {
     this.mesh.position.x = 200;
     this.mesh.position.y = config.y || Math.random();
     this.mesh.position.z = config.z || 0;
+
+    const scale = config.scale || 0.7 + Math.random() * 0.8;
+    this.mesh.scale.set(scale, scale, scale);
 
     this.mesh.add(cloud);
   }
@@ -101,14 +106,10 @@ export class Cloud {
     cloud3.scale.set(0.75, 0.5, 1);
     cloud3.position.set(-5.5, -2, -1);
 
-    const cloud4 = cloud.clone();
-    cloud4.scale.set(0.75, 0.5, 1);
-    cloud4.position.set(5, -1.5, 2);
-
     group.add(cloud);
     group.add(cloud2);
     group.add(cloud3);
-    group.add(cloud4);
+
     shadowSupport(group);
 
     return group;

@@ -121,6 +121,27 @@ function createFloor() {
   internals.scene.add(floor);
 }
 
+function generateRandomClouds() {
+  const clouds = [];
+
+  const cloudCount = Math.floor(Math.random() * 6) + 3;
+
+  for (let i = 0; i < cloudCount; i++) {
+    const cloudConfig = {
+      y: (Math.random() - 0.5) * 100 + (Math.random() - 0.5) * 20,
+      z: (Math.random() - 0.5) * 80,
+      delay: Math.random() < 0.3 ? 0 : Math.random() * 10,
+      scale: Math.random() < 0.2 ? 0.5 + Math.random() * 0.4 : undefined,
+      speed: Math.random() < 0.3 ? 0.3 + Math.random() * 1.2 : undefined,
+    };
+
+    clouds.push(new Cloud(cloudConfig));
+  }
+
+  console.log(`Generated ${cloudCount} random clouds`);
+  return clouds;
+}
+
 function addElements() {
   internals.planet = new Planet({
     useGrassTexture: true,
@@ -143,13 +164,7 @@ function addElements() {
     textureName: "peeling-painted-metal",
   });
   internals.scene.add(internals.orbitingPlanet.mesh);
-
-  internals.clouds = [
-    new Cloud({ y: -15, z: 20 }),
-    new Cloud({ y: 5, z: 10, delay: 3 }),
-    new Cloud({ y: 25, z: -10, delay: 1.5 }),
-    new Cloud({ y: -25, z: 10, delay: 6 }),
-  ];
+  internals.clouds = generateRandomClouds();
 
   internals.clouds.forEach((cloud) => {
     internals.scene.add(cloud.mesh);
