@@ -1,12 +1,11 @@
+import { Group, SphereGeometry, Mesh } from "three";
 import {
-  Group,
-  TextureLoader,
-  RepeatWrapping,
-  MeshStandardMaterial,
-  SphereGeometry,
-  Mesh,
-} from "three";
-import { shadowSupport, randomIntFromInterval } from "../utils/helpers.js";
+  shadowSupport,
+  randomIntFromInterval,
+  loadTextures,
+  applyTexture,
+  createMaterial,
+} from "../utils/helpers.js";
 
 export class Cloud {
   constructor(config) {
@@ -44,53 +43,29 @@ export class Cloud {
   }
 
   _createCloud() {
-    let textureLoader = new TextureLoader();
+    const textures = loadTextures("wrinkled-paper");
 
-    const albedoTexture = textureLoader.load(
-      "../assets/wrinkled-paper-albedo.png"
-    );
+    textures.forEach((texture) => applyTexture(texture, 2));
 
-    const aoTexture = textureLoader.load("../assets/wrinkled-paper-ao.png");
-
-    const heightTexture = textureLoader.load(
-      "../assets/wrinkled-paper-height.png"
-    );
-
-    const metallicTexture = textureLoader.load(
-      "../assets/wrinkled-paper-metallic.png"
-    );
-
-    const normalTexture = textureLoader.load(
-      "../assets/wrinkled-paper-normal-ogl.png"
-    );
-
-    const roughnessTexture = textureLoader.load(
-      "../assets/wrinkled-paper-roughness.png"
-    );
-
-    [
+    const [
       albedoTexture,
       aoTexture,
       heightTexture,
       metallicTexture,
       normalTexture,
       roughnessTexture,
-    ].forEach((texture) => {
-      texture.wrapS = RepeatWrapping;
-      texture.wrapT = RepeatWrapping;
-      texture.repeat.set(2, 2);
-    });
+    ] = textures;
 
-    const cloudMaterial = new MeshStandardMaterial({
-      map: albedoTexture,
-      aoMap: aoTexture,
-      displacementMap: heightTexture,
-      displacementScale: 0,
-      metalnessMap: metallicTexture,
-      normalMap: normalTexture,
-      roughnessMap: roughnessTexture,
-      flatShading: false,
-    });
+    const cloudMaterial = createMaterial(
+      albedoTexture,
+      aoTexture,
+      heightTexture,
+      0,
+      metallicTexture,
+      normalTexture,
+      roughnessTexture,
+      false
+    );
 
     const group = new Group();
 

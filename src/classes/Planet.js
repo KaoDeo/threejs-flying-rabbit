@@ -1,12 +1,10 @@
+import { Group, SphereGeometry, Mesh } from "three";
 import {
-  Group,
-  SphereGeometry,
-  Mesh,
-  RepeatWrapping,
-  MeshStandardMaterial,
-  TextureLoader,
-} from "three";
-import { shadowSupport } from "../utils/helpers.js";
+  shadowSupport,
+  createMaterial,
+  applyTexture,
+  loadTextures,
+} from "../utils/helpers.js";
 
 export class Planet {
   constructor(options = {}) {
@@ -60,14 +58,14 @@ export class Planet {
   _createPlanet(textureName) {
     let planetMaterial;
 
-    const textures = this._loadTextures(textureName);
+    const textures = loadTextures(textureName);
 
     switch (textureName) {
       case "worn-rusted-painted":
         {
-          textures.forEach((texture) => this._applyTexture(texture, 2));
+          textures.forEach((texture) => applyTexture(texture, 2));
           const [albedo, ao, height, metallic, normal, roughness] = textures;
-          planetMaterial = this._createMaterial(
+          planetMaterial = createMaterial(
             albedo,
             ao,
             height,
@@ -81,9 +79,9 @@ export class Planet {
         break;
       case "peeling-painted-metal":
         {
-          textures.forEach((texture) => this._applyTexture(texture));
+          textures.forEach((texture) => applyTexture(texture));
           const [albedo, ao, height, metallic, normal, roughness] = textures;
-          planetMaterial = this._createMaterial(
+          planetMaterial = createMaterial(
             albedo,
             ao,
             height,
@@ -105,100 +103,5 @@ export class Planet {
 
     this.mesh.add(this.planet);
     shadowSupport(this.mesh);
-  }
-
-  _applyTexture(texture, repeat = 1) {
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = RepeatWrapping;
-    texture.repeat.set(repeat, repeat);
-  }
-
-  _createMaterial(
-    albedoTexture,
-    aoTexture,
-    heightTexture,
-    displacementScale,
-    metallicTexture,
-    normalTexture,
-    roughnessTexture,
-    flatShading = true
-  ) {
-    return new MeshStandardMaterial({
-      map: albedoTexture,
-      aoMap: aoTexture,
-      displacementMap: heightTexture,
-      displacementScale: displacementScale,
-      metalnessMap: metallicTexture,
-      normalMap: normalTexture,
-      roughnessMap: roughnessTexture,
-      flatShading: flatShading,
-    });
-  }
-
-  _loadTextures(textureName) {
-    const textureLoader = new TextureLoader();
-
-    switch (textureName) {
-      case "worn-rusted-painted":
-        const albedoTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_albedo.png"
-        );
-        const aoTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_ao.png"
-        );
-        const heightTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_height.png"
-        );
-        const metallicTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_metallic.png"
-        );
-        const normalTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_normal-ogl.png"
-        );
-        const roughnessTexture = textureLoader.load(
-          "../assets/worn-rusted-painted_roughness.png"
-        );
-
-        return [
-          albedoTexture,
-          aoTexture,
-          heightTexture,
-          metallicTexture,
-          normalTexture,
-          roughnessTexture,
-        ];
-
-      case "peeling-painted-metal": {
-        const albedoTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_albedo.png"
-        );
-        const aoTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_ao.png"
-        );
-        const heightTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_height.png"
-        );
-        const metallicTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_metallic.png"
-        );
-        const normalTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_normal-ogl.png"
-        );
-        const roughnessTexture = textureLoader.load(
-          "../assets/peeling-painted-metal_roughness.png"
-        );
-
-        return [
-          albedoTexture,
-          aoTexture,
-          heightTexture,
-          metallicTexture,
-          normalTexture,
-          roughnessTexture,
-        ];
-      }
-      default:
-        return null;
-    }
   }
 }
