@@ -8,6 +8,11 @@ export class Carrot {
     this.mesh = new THREE.Group();
     this.time = 0;
 
+    // Orbital parameters
+    this.orbitRadius = 60;
+    this.orbitSpeed = 0.01;
+    this.orbitAngle = 0;
+
     this.body = this._createBody();
     this.wings = this._createWings();
     this.leafs = this._createLeafs();
@@ -24,11 +29,32 @@ export class Carrot {
 
   update() {
     this.time += 0.016;
+    this.orbitAngle += this.orbitSpeed;
 
-    this.mesh.position.x = -2 + Math.sin(this.time * 0.5) * 1;
-    this.mesh.position.y = 4 + Math.sin(this.time * 0.3) * 2;
-    this.mesh.position.z = Math.sin(this.time * 0.4) * 3;
+    // Orbital motion around planet (planet is at 0, -50, -20)
+    const planetX = 0,
+      planetY = -50,
+      planetZ = -20;
+    const baseX = planetX + Math.cos(this.orbitAngle) * this.orbitRadius;
+    const baseZ = planetZ + Math.sin(this.orbitAngle) * this.orbitRadius;
+    const baseY = planetY + 20; // Orbit above the planet
 
+    // Add floating motion on top of orbital motion
+    this.mesh.position.x = baseX + Math.sin(this.time * 0.5) * 1;
+    this.mesh.position.y = baseY + Math.sin(this.time * 0.3) * 2;
+    this.mesh.position.z = baseZ + Math.sin(this.time * 0.4) * 1;
+
+    // Natural orientation - face flight direction
+    const flightDirectionX = -Math.sin(this.orbitAngle);
+    const flightDirectionZ = Math.cos(this.orbitAngle);
+
+    // Face the direction of movement
+    this.mesh.rotation.y = Math.atan2(flightDirectionX, flightDirectionZ);
+
+    // Gentle banking (tilt into the turn) - reduced to prevent flipping
+    this.mesh.rotation.z = Math.sin(this.orbitAngle) * 0.1;
+
+    // Keep original pitch with slight variation
     this.mesh.rotation.x = -1.7 + Math.sin(this.time) * 0.1;
 
     this.leafs.rotation.y = this.time * 10;
