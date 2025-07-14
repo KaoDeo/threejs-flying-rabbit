@@ -1,5 +1,3 @@
-import * as THREE from "three";
-
 // Constants
 export const DIMENSIONS = {
   W: 500,

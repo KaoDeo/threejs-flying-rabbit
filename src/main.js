@@ -1,4 +1,15 @@
-import * as THREE from "three";
+import {
+  WebGLRenderer,
+  PerspectiveCamera,
+  Scene,
+  Fog,
+  DirectionalLight,
+  AmbientLight,
+  Mesh,
+  PlaneGeometry,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+} from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
@@ -39,13 +50,13 @@ function handleText(inputValue) {
           -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
         geometry.translate(centerOffsetX, 0, 0);
 
-        const material = new THREE.MeshStandardMaterial({
+        const material = new MeshStandardMaterial({
           color: 0x5c2c22,
           roughness: 0.8,
           metalness: 0.1,
         });
 
-        internals.textMesh = new THREE.Mesh(geometry, material);
+        internals.textMesh = new Mesh(geometry, material);
         internals.textMesh.castShadow = true;
         internals.scene.add(internals.textMesh);
       }
@@ -54,18 +65,18 @@ function handleText(inputValue) {
 }
 
 function initializeThreeJS() {
-  internals.renderer = new THREE.WebGLRenderer({
+  internals.renderer = new WebGLRenderer({
     alpha: true,
     antialias: true,
   });
-  internals.camera = new THREE.PerspectiveCamera(
+  internals.camera = new PerspectiveCamera(
     45,
     internals.W / internals.H,
     1,
     1000
   );
-  internals.scene = new THREE.Scene();
-  internals.scene.fog = new THREE.Fog(COLORS.fogColor, 100, 300);
+  internals.scene = new Scene();
+  internals.scene.fog = new Fog(COLORS.fogColor, 100, 300);
 
   internals.renderer.setPixelRatio(window.devicePixelRatio);
   internals.renderer.setClearColor(COLORS.clearColor, 0.7);
@@ -91,18 +102,18 @@ function initializeThreeJS() {
 }
 
 function setupLights() {
-  const directional = new THREE.DirectionalLight(COLORS.directionalLight, 1);
+  const directional = new DirectionalLight(COLORS.directionalLight, 1);
   directional.position.set(30, 20, 0);
   directional.castShadow = true;
 
-  internals.scene.add(new THREE.AmbientLight(COLORS.ambientLight, 1));
+  internals.scene.add(new AmbientLight(COLORS.ambientLight, 1));
   internals.scene.add(directional);
 }
 
 function createFloor() {
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(1000, 1000),
-    new THREE.MeshBasicMaterial({ color: COLORS.floorColor })
+  const floor = new Mesh(
+    new PlaneGeometry(1000, 1000),
+    new MeshBasicMaterial({ color: COLORS.floorColor })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -100;

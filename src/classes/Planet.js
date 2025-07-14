@@ -1,9 +1,16 @@
-import * as THREE from "three";
+import {
+  Group,
+  SphereGeometry,
+  Mesh,
+  RepeatWrapping,
+  MeshStandardMaterial,
+  TextureLoader,
+} from "three";
 import { shadowSupport } from "../utils/helpers.js";
 
 export class Planet {
   constructor(options = {}) {
-    this.mesh = new THREE.Group();
+    this.mesh = new Group();
     this.planet = null;
     this.rotation = { x: 0.001, y: 0.002 };
 
@@ -90,9 +97,9 @@ export class Planet {
         break;
     }
 
-    const planetGeometry = new THREE.SphereGeometry(this.size, 32, 32);
+    const planetGeometry = new SphereGeometry(this.size, 32, 32);
 
-    this.planet = new THREE.Mesh(planetGeometry, planetMaterial);
+    this.planet = new Mesh(planetGeometry, planetMaterial);
     this.planet.castShadow = true;
     this.planet.receiveShadow = true;
 
@@ -101,8 +108,8 @@ export class Planet {
   }
 
   _applyTexture(texture, repeat = 1) {
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
     texture.repeat.set(repeat, repeat);
   }
 
@@ -116,7 +123,7 @@ export class Planet {
     roughnessTexture,
     flatShading = true
   ) {
-    return new THREE.MeshStandardMaterial({
+    return new MeshStandardMaterial({
       map: albedoTexture,
       aoMap: aoTexture,
       displacementMap: heightTexture,
@@ -129,7 +136,7 @@ export class Planet {
   }
 
   _loadTextures(textureName) {
-    const textureLoader = new THREE.TextureLoader();
+    const textureLoader = new TextureLoader();
 
     switch (textureName) {
       case "worn-rusted-painted":

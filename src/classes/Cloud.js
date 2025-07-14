@@ -1,9 +1,16 @@
-import * as THREE from "three";
+import {
+  Group,
+  TextureLoader,
+  RepeatWrapping,
+  MeshStandardMaterial,
+  SphereGeometry,
+  Mesh,
+} from "three";
 import { shadowSupport, randomIntFromInterval } from "../utils/helpers.js";
 
 export class Cloud {
   constructor(config) {
-    this.mesh = new THREE.Group();
+    this.mesh = new Group();
     this.speed = 0.8;
     this.delay = (config.delay || 0) * 60;
     this.delayCounter = 0;
@@ -32,7 +39,7 @@ export class Cloud {
   }
 
   _createCloud() {
-    let textureLoader = new THREE.TextureLoader();
+    let textureLoader = new TextureLoader();
 
     const albedoTexture = textureLoader.load(
       "../assets/wrinkled-paper-albedo.png"
@@ -64,12 +71,12 @@ export class Cloud {
       normalTexture,
       roughnessTexture,
     ].forEach((texture) => {
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
       texture.repeat.set(2, 2);
     });
 
-    const cloudMaterial = new THREE.MeshStandardMaterial({
+    const cloudMaterial = new MeshStandardMaterial({
       map: albedoTexture,
       aoMap: aoTexture,
       displacementMap: heightTexture,
@@ -80,10 +87,10 @@ export class Cloud {
       flatShading: false,
     });
 
-    const group = new THREE.Group();
+    const group = new Group();
 
-    const cloudGeo = new THREE.SphereGeometry(5, 4, 6);
-    const cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
+    const cloudGeo = new SphereGeometry(5, 4, 6);
+    const cloud = new Mesh(cloudGeo, cloudMaterial);
     cloud.scale.set(1, 0.8, 1);
 
     const cloud2 = cloud.clone();
