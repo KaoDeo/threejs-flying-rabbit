@@ -66,7 +66,7 @@ export class Cloud {
     ].forEach((texture) => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(2, 2); // Repeat texture 8 times for better detail
+      texture.repeat.set(2, 2);
     });
 
     const cloudMaterial = new THREE.MeshStandardMaterial({
@@ -77,7 +77,7 @@ export class Cloud {
       metalnessMap: metallicTexture,
       normalMap: normalTexture,
       roughnessMap: roughnessTexture,
-      flatShading: false, // Disable flat shading for better texture rendering
+      flatShading: false,
     });
 
     const group = new THREE.Group();
@@ -94,10 +94,14 @@ export class Cloud {
     cloud3.scale.set(0.75, 0.5, 1);
     cloud3.position.set(-5.5, -2, -1);
 
+    const cloud4 = cloud.clone();
+    cloud4.scale.set(0.75, 0.5, 1);
+    cloud4.position.set(5, -1.5, 2);
+
     group.add(cloud);
     group.add(cloud2);
     group.add(cloud3);
-
+    group.add(cloud4);
     shadowSupport(group);
 
     return group;

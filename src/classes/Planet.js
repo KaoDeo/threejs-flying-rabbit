@@ -7,7 +7,6 @@ export class Planet {
     this.planet = null;
     this.rotation = { x: 0.001, y: 0.002 };
 
-    // Orbital configuration
     this.isOrbiting = options.isOrbiting || false;
     this.orbitAngle = options.orbitAngle || 0;
     this.orbitSpeed = options.orbitSpeed || 0.01;
@@ -15,14 +14,11 @@ export class Planet {
     this.orbitCenter = options.orbitCenter || { x: 0, y: -50, z: -20 };
     this.orbitHeight = options.orbitHeight || 0;
 
-    // Planet configuration
     this.size = options.size || 30;
     this.color = options.color || null;
-    this.useGrassTexture = options.useGrassTexture !== false;
 
-    this._createPlanet();
+    this._createPlanet(options.textureName);
 
-    // Set initial position
     if (this.isOrbiting) {
       this._updateOrbitPosition();
     } else {
@@ -40,7 +36,6 @@ export class Planet {
       this.planet.rotation.y += this.rotation.y;
     }
 
-    // Update orbital position if orbiting
     if (this.isOrbiting) {
       this.orbitAngle += this.orbitSpeed;
       this._updateOrbitPosition();
@@ -55,111 +50,148 @@ export class Planet {
     this.mesh.position.set(x, y, z);
   }
 
-  _createPlanet() {
+  _createPlanet(textureName) {
     let planetMaterial;
-    let textureLoader = new THREE.TextureLoader();
 
-    if (this.useGrassTexture) {
-      const albedoTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_albedo.png"
-      );
-      const aoTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_ao.png"
-      );
-      const heightTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_height.png"
-      );
-      const metallicTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_metallic.png"
-      );
-      const normalTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_normal-ogl.png"
-      );
-      const roughnessTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_roughness.png"
-      );
+    const textures = this._loadTextures(textureName);
 
-      // Configure texture settings for better tiling
-      [
-        albedoTexture,
-        aoTexture,
-        heightTexture,
-        metallicTexture,
-        normalTexture,
-        roughnessTexture,
-      ].forEach((texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2); // Repeat texture 8 times for better detail
-      });
-
-      // Create grass material using StandardMaterial for better texture support
-      planetMaterial = new THREE.MeshStandardMaterial({
-        map: albedoTexture,
-        aoMap: aoTexture,
-        displacementMap: heightTexture,
-        displacementScale: 0,
-        metalnessMap: metallicTexture,
-        normalMap: normalTexture,
-        roughnessMap: roughnessTexture,
-        flatShading: false, // Disable flat shading for better texture rendering
-      });
-    } else {
-      const albedoTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_albedo.png"
-      );
-      const aoTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_ao.png"
-      );
-      const heightTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_height.png"
-      );
-      const metallicTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_metallic.png"
-      );
-      const normalTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_normal-ogl.png"
-      );
-      const roughnessTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_roughness.png"
-      );
-
-      // Configure texture settings for better tiling
-      [
-        albedoTexture,
-        aoTexture,
-        heightTexture,
-        metallicTexture,
-        normalTexture,
-        roughnessTexture,
-      ].forEach((texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1); // Repeat texture 8 times for better detail
-      });
-
-      // Create grass material using StandardMaterial for better texture support
-      planetMaterial = new THREE.MeshStandardMaterial({
-        map: albedoTexture,
-        aoMap: aoTexture,
-        displacementMap: heightTexture,
-        displacementScale: 3,
-        metalnessMap: metallicTexture,
-        normalMap: normalTexture,
-        roughnessMap: roughnessTexture,
-        flatShading: true, // Disable flat shading for better texture rendering
-      });
+    switch (textureName) {
+      case "worn-rusted-painted":
+        {
+          textures.forEach((texture) => this._applyTexture(texture, 2));
+          const [albedo, ao, height, metallic, normal, roughness] = textures;
+          planetMaterial = this._createMaterial(
+            albedo,
+            ao,
+            height,
+            0,
+            metallic,
+            normal,
+            roughness,
+            false
+          );
+        }
+        break;
+      case "peeling-painted-metal":
+        {
+          textures.forEach((texture) => this._applyTexture(texture));
+          const [albedo, ao, height, metallic, normal, roughness] = textures;
+          planetMaterial = this._createMaterial(
+            albedo,
+            ao,
+            height,
+            3,
+            metallic,
+            normal,
+            roughness,
+            true
+          );
+        }
+        break;
     }
 
-    // Create planet geometry
     const planetGeometry = new THREE.SphereGeometry(this.size, 32, 32);
 
-    // Create planet mesh
     this.planet = new THREE.Mesh(planetGeometry, planetMaterial);
     this.planet.castShadow = true;
     this.planet.receiveShadow = true;
 
     this.mesh.add(this.planet);
     shadowSupport(this.mesh);
+  }
+
+  _applyTexture(texture, repeat = 1) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeat, repeat);
+  }
+
+  _createMaterial(
+    albedoTexture,
+    aoTexture,
+    heightTexture,
+    displacementScale,
+    metallicTexture,
+    normalTexture,
+    roughnessTexture,
+    flatShading = true
+  ) {
+    return new THREE.MeshStandardMaterial({
+      map: albedoTexture,
+      aoMap: aoTexture,
+      displacementMap: heightTexture,
+      displacementScale: displacementScale,
+      metalnessMap: metallicTexture,
+      normalMap: normalTexture,
+      roughnessMap: roughnessTexture,
+      flatShading: flatShading,
+    });
+  }
+
+  _loadTextures(textureName) {
+    const textureLoader = new THREE.TextureLoader();
+
+    switch (textureName) {
+      case "worn-rusted-painted":
+        const albedoTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_albedo.png"
+        );
+        const aoTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_ao.png"
+        );
+        const heightTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_height.png"
+        );
+        const metallicTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_metallic.png"
+        );
+        const normalTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_normal-ogl.png"
+        );
+        const roughnessTexture = textureLoader.load(
+          "../assets/worn-rusted-painted_roughness.png"
+        );
+
+        return [
+          albedoTexture,
+          aoTexture,
+          heightTexture,
+          metallicTexture,
+          normalTexture,
+          roughnessTexture,
+        ];
+
+      case "peeling-painted-metal": {
+        const albedoTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_albedo.png"
+        );
+        const aoTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_ao.png"
+        );
+        const heightTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_height.png"
+        );
+        const metallicTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_metallic.png"
+        );
+        const normalTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_normal-ogl.png"
+        );
+        const roughnessTexture = textureLoader.load(
+          "../assets/peeling-painted-metal_roughness.png"
+        );
+
+        return [
+          albedoTexture,
+          aoTexture,
+          heightTexture,
+          metallicTexture,
+          normalTexture,
+          roughnessTexture,
+        ];
+      }
+      default:
+        return null;
+    }
   }
 }

@@ -115,7 +115,9 @@ function addElements() {
     useGrassTexture: true,
     size: 30,
     position: { x: 0, y: -50, z: -20 },
+    textureName: "worn-rusted-painted",
   });
+
   internals.scene.add(internals.planet.mesh);
 
   internals.orbitingPlanet = new Planet({
@@ -127,6 +129,7 @@ function addElements() {
     orbitRadius: 80,
     orbitCenter: { x: 0, y: -50, z: -20 },
     orbitHeight: 10,
+    textureName: "peeling-painted-metal",
   });
   internals.scene.add(internals.orbitingPlanet.mesh);
 
