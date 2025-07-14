@@ -3,8 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 
-import { DIMENSIONS, MATERIALS, COLORS } from "./constants/materials.js";
-import { Carrot } from "./classes/Carrot.js";
+import { DIMENSIONS, COLORS } from "./constants/materials.js";
 import { Cloud } from "./classes/Cloud.js";
 import { Planet } from "./classes/Planet.js";
 
@@ -13,45 +12,42 @@ const internals = {};
 internals.W = DIMENSIONS.W;
 internals.H = DIMENSIONS.H;
 
-document.addEventListener("DOMContentLoaded", () => {
-  const inputElement = document.getElementById("user-input");
-  const submitButton = document.getElementById("submit-button");
-
-  submitButton.addEventListener("click", () => {
-    const inputValue = inputElement.value;
-    handleText(inputValue);
-  });
-});
-
 function handleText(inputValue) {
-  const carrot = internals.carrot;
-  if (carrot) {
+  if (inputValue && inputValue.trim() !== "") {
     const loader = new FontLoader();
 
     loader.load(
       "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
       function (font) {
+        if (internals.textMesh) {
+          internals.scene.remove(internals.textMesh);
+        }
+
         const geometry = new TextGeometry(inputValue, {
           font: font,
-          size: 3,
+          size: 2,
           depth: 0.1,
           bevelEnabled: true,
-          bevelThickness: 0.1,
-          bevelSize: 0.1,
+          bevelThickness: 0.05,
+          bevelSize: 0.05,
           bevelOffset: 0,
           bevelSegments: 1,
         });
 
-        const material = new THREE.MeshBasicMaterial({
-          color: 0x5c2c22,
-          flastShading: true,
-        });
-        const text = new THREE.Mesh(geometry, material);
-        text.position.set(0, -6, 0);
+        geometry.computeBoundingBox();
+        const centerOffsetX =
+          -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        geometry.translate(centerOffsetX, 0, 0);
 
-        if (inputValue) {
-          internals.scene.add(text);
-        }
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x5c2c22,
+          roughness: 0.8,
+          metalness: 0.1,
+        });
+
+        internals.textMesh = new THREE.Mesh(geometry, material);
+        internals.textMesh.castShadow = true;
+        internals.scene.add(internals.textMesh);
       }
     );
   }
@@ -81,38 +77,17 @@ function initializeThreeJS() {
     internals.W,
     internals.W / DIMENSIONS.ASPECT_RATIO
   );
-  internals.resizeHandler = () => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const aspect = width / height;
 
-    if (aspect > DIMENSIONS.ASPECT_RATIO) {
-      internals.W = height * DIMENSIONS.ASPECT_RATIO;
-      internals.H = height;
-    } else {
-      internals.W = width;
-      internals.H = width / DIMENSIONS.ASPECT_RATIO;
-    }
-
-    internals.renderer.setSize(internals.W, internals.H);
-    internals.camera.aspect = DIMENSIONS.ASPECT_RATIO;
-    internals.camera.updateProjectionMatrix();
-  };
-
-  internals.resizeHandler();
   internals.renderer.shadowMap.enabled = true;
   document.body.appendChild(internals.renderer.domElement);
 
   internals.camera.position.set(40, 20, 100);
   internals.scene.add(internals.camera);
 
-  // Disable OrbitControls for follow camera mode
-  // internals.controls = new OrbitControls(
-  //   internals.camera,
-  //   internals.renderer.domElement
-  // );
-  // internals.controls.minDistance = 50;
-  // internals.controls.maxDistance = 250;
+  internals.controls = new OrbitControls(
+    internals.camera,
+    internals.renderer.domElement
+  );
 }
 
 function setupLights() {
@@ -136,11 +111,24 @@ function createFloor() {
 }
 
 function addElements() {
-  internals.carrot = new Carrot();
-  internals.scene.add(internals.carrot.mesh);
-
-  internals.planet = new Planet();
+  internals.planet = new Planet({
+    useGrassTexture: true,
+    size: 30,
+    position: { x: 0, y: -50, z: -20 },
+  });
   internals.scene.add(internals.planet.mesh);
+
+  internals.orbitingPlanet = new Planet({
+    useGrassTexture: false,
+    size: 8,
+    color: 0x8b4513,
+    isOrbiting: true,
+    orbitSpeed: 0.01,
+    orbitRadius: 80,
+    orbitCenter: { x: 0, y: -50, z: -20 },
+    orbitHeight: 10,
+  });
+  internals.scene.add(internals.orbitingPlanet.mesh);
 
   internals.clouds = [
     new Cloud({ y: -15, z: 20 }),
@@ -154,72 +142,53 @@ function addElements() {
   });
 }
 
-function setupInteractions() {
-  const startInteraction = () => {
-    if (internals.carrot && internals.carrot.pilot) {
-      internals.carrot.pilot.startEyeBlinking();
-    }
-  };
-
-  const endInteraction = () => {
-    if (internals.carrot && internals.carrot.pilot) {
-      internals.carrot.pilot.stopEyeBlinking();
-    }
-  };
-
-  internals.renderer.domElement.addEventListener("mousedown", startInteraction);
-  internals.renderer.domElement.addEventListener("mouseup", endInteraction);
-}
-
 function setupRender() {
-  // Camera orbital parameters - following carrot's path but from distance
-  let cameraOrbitAngle = 0;
-  const cameraOrbitSpeed = 0.009; // Slightly slower than carrot (0.01) for visible movement
-  const cameraOrbitRadius = 100; // Further out than carrot (60)
-  const cameraHeight = 25; // Slightly above carrot level
-
   internals.render = () => {
-    if (internals.carrot) {
-      internals.carrot.update();
-      if (internals.carrot.pilot) {
-        internals.carrot.pilot.update();
-        internals.carrot.pilot.updateBlinking();
-      }
-    }
-
     if (internals.planet) {
       internals.planet.update();
+    }
+
+    if (internals.orbitingPlanet) {
+      internals.orbitingPlanet.update();
+
+      if (internals.textMesh) {
+        const planetPos = internals.orbitingPlanet.mesh.position;
+        internals.textMesh.position.set(
+          planetPos.x,
+          planetPos.y - 15,
+          planetPos.z
+        );
+        internals.textMesh.lookAt(internals.camera.position);
+      }
     }
 
     if (internals.clouds) {
       internals.clouds.forEach((cloud) => cloud.update());
     }
 
-    // Camera following carrot's orbital path from distance
-    cameraOrbitAngle += cameraOrbitSpeed;
-
-    // Planet position
-    const planetX = 0,
-      planetY = -50,
-      planetZ = -20;
-
-    // Calculate camera orbital position
-    const cameraX = planetX + Math.cos(cameraOrbitAngle) * cameraOrbitRadius;
-    const cameraY = planetY + cameraHeight;
-    const cameraZ = planetZ + Math.sin(cameraOrbitAngle) * cameraOrbitRadius;
-
-    // Set camera position
-    internals.camera.position.set(cameraX, cameraY, cameraZ);
-
-    // Look at the carrot (following its movement)
-    if (internals.carrot) {
-      internals.camera.lookAt(internals.carrot.mesh.position);
-    }
-
     internals.renderer.render(internals.scene, internals.camera);
     requestAnimationFrame(internals.render);
   };
   internals.render();
+}
+
+function setupInteractions() {
+  const inputElement = document.getElementById("user-input");
+  const submitButton = document.getElementById("submit-button");
+
+  if (inputElement && submitButton) {
+    submitButton.addEventListener("click", () => {
+      const inputValue = inputElement.value;
+      handleText(inputValue);
+    });
+
+    inputElement.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const inputValue = inputElement.value;
+        handleText(inputValue);
+      }
+    });
+  }
 }
 
 function init() {

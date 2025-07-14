@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { MATERIALS } from "../constants/materials.js";
 import { shadowSupport, randomIntFromInterval } from "../utils/helpers.js";
 
 export class Cloud {
@@ -33,10 +32,58 @@ export class Cloud {
   }
 
   _createCloud() {
+    let textureLoader = new THREE.TextureLoader();
+
+    const albedoTexture = textureLoader.load(
+      "../assets/wrinkled-paper-albedo.png"
+    );
+
+    const aoTexture = textureLoader.load("../assets/wrinkled-paper-ao.png");
+
+    const heightTexture = textureLoader.load(
+      "../assets/wrinkled-paper-height.png"
+    );
+
+    const metallicTexture = textureLoader.load(
+      "../assets/wrinkled-paper-metallic.png"
+    );
+
+    const normalTexture = textureLoader.load(
+      "../assets/wrinkled-paper-normal-ogl.png"
+    );
+
+    const roughnessTexture = textureLoader.load(
+      "../assets/wrinkled-paper-roughness.png"
+    );
+
+    [
+      albedoTexture,
+      aoTexture,
+      heightTexture,
+      metallicTexture,
+      normalTexture,
+      roughnessTexture,
+    ].forEach((texture) => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(2, 2); // Repeat texture 8 times for better detail
+    });
+
+    const cloudMaterial = new THREE.MeshStandardMaterial({
+      map: albedoTexture,
+      aoMap: aoTexture,
+      displacementMap: heightTexture,
+      displacementScale: 0,
+      metalnessMap: metallicTexture,
+      normalMap: normalTexture,
+      roughnessMap: roughnessTexture,
+      flatShading: false, // Disable flat shading for better texture rendering
+    });
+
     const group = new THREE.Group();
 
     const cloudGeo = new THREE.SphereGeometry(5, 4, 6);
-    const cloud = new THREE.Mesh(cloudGeo, MATERIALS.clouds);
+    const cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
     cloud.scale.set(1, 0.8, 1);
 
     const cloud2 = cloud.clone();
