@@ -6,6 +6,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { DIMENSIONS, MATERIALS, COLORS } from "./constants/materials.js";
 import { Carrot } from "./classes/Carrot.js";
 import { Cloud } from "./classes/Cloud.js";
+import { Planet } from "./classes/Planet.js";
 
 const internals = {};
 
@@ -136,6 +137,9 @@ function addElements() {
   internals.carrot = new Carrot();
   internals.scene.add(internals.carrot.mesh);
 
+  internals.planet = new Planet();
+  internals.scene.add(internals.planet.mesh);
+
   internals.clouds = [
     new Cloud({ y: -15, z: 20 }),
     new Cloud({ y: 5, z: 10, delay: 3 }),
@@ -173,6 +177,10 @@ function setupRender() {
         internals.carrot.pilot.update();
         internals.carrot.pilot.updateBlinking();
       }
+    }
+
+    if (internals.planet) {
+      internals.planet.update();
     }
 
     if (internals.clouds) {
