@@ -9,13 +9,14 @@ import {
   PlaneGeometry,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  Color,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 
 import { DIMENSIONS, COLORS } from "./constants/materials.js";
-import { Cloud } from "./classes/Cloud.js";
+
 import { Planet } from "./classes/Planet.js";
 
 const internals = {};
@@ -121,30 +122,8 @@ function createFloor() {
   internals.scene.add(floor);
 }
 
-function generateRandomClouds() {
-  const clouds = [];
-
-  const cloudCount = Math.floor(Math.random() * 6) + 3;
-
-  for (let i = 0; i < cloudCount; i++) {
-    const cloudConfig = {
-      y: (Math.random() - 0.5) * 100 + (Math.random() - 0.5) * 20,
-      z: (Math.random() - 0.5) * 80,
-      delay: Math.random() < 0.3 ? 0 : Math.random() * 10,
-      scale: Math.random() < 0.2 ? 0.5 + Math.random() * 0.4 : undefined,
-      speed: Math.random() < 0.3 ? 0.3 + Math.random() * 1.2 : undefined,
-    };
-
-    clouds.push(new Cloud(cloudConfig));
-  }
-
-  console.log(`Generated ${cloudCount} random clouds`);
-  return clouds;
-}
-
 function addElements() {
   internals.planet = new Planet({
-    useGrassTexture: true,
     size: 30,
     position: { x: 0, y: -50, z: -20 },
     textureName: "worn-rusted-painted",
@@ -153,7 +132,6 @@ function addElements() {
   internals.scene.add(internals.planet.mesh);
 
   internals.orbitingPlanet = new Planet({
-    useGrassTexture: false,
     size: 8,
     color: 0x8b4513,
     isOrbiting: true,
@@ -164,15 +142,16 @@ function addElements() {
     textureName: "peeling-painted-metal",
   });
   internals.scene.add(internals.orbitingPlanet.mesh);
-  internals.clouds = generateRandomClouds();
 
-  internals.clouds.forEach((cloud) => {
-    internals.scene.add(cloud.mesh);
-  });
+  // Attach camera to the orbiting planet
+  internals.camera.position.set(10, 15, 10); // Above planet surface
+  internals.orbitingPlanet.mesh.add(internals.camera);
 }
 
 function setupRender() {
   internals.render = () => {
+    const time = Date.now() * 0.001; // Current time for animations
+
     if (internals.planet) {
       internals.planet.update();
     }
@@ -191,8 +170,11 @@ function setupRender() {
       }
     }
 
-    if (internals.clouds) {
-      internals.clouds.forEach((cloud) => cloud.update());
+    if (internals.scene.fog) {
+      const fogHue = (time * 0.1) % 1;
+      const fogColor = new Color().setHSL(fogHue * 0.3 + 0.5, 0.3, 0.8);
+      internals.scene.fog.color = fogColor;
+      internals.renderer.setClearColor(fogColor, 0.7);
     }
 
     internals.renderer.render(internals.scene, internals.camera);
