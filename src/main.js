@@ -105,12 +105,14 @@ function initializeThreeJS() {
 
   internals.camera.position.set(40, 20, 100);
   internals.scene.add(internals.camera);
-  internals.controls = new OrbitControls(
-    internals.camera,
-    internals.renderer.domElement
-  );
-  internals.controls.minDistance = 50;
-  internals.controls.maxDistance = 250;
+
+  // Disable OrbitControls for follow camera mode
+  // internals.controls = new OrbitControls(
+  //   internals.camera,
+  //   internals.renderer.domElement
+  // );
+  // internals.controls.minDistance = 50;
+  // internals.controls.maxDistance = 250;
 }
 
 function setupLights() {
@@ -170,6 +172,12 @@ function setupInteractions() {
 }
 
 function setupRender() {
+  // Camera orbital parameters - following carrot's path but from distance
+  let cameraOrbitAngle = 0;
+  const cameraOrbitSpeed = 0.009; // Slightly slower than carrot (0.01) for visible movement
+  const cameraOrbitRadius = 100; // Further out than carrot (60)
+  const cameraHeight = 25; // Slightly above carrot level
+
   internals.render = () => {
     if (internals.carrot) {
       internals.carrot.update();
@@ -185,6 +193,27 @@ function setupRender() {
 
     if (internals.clouds) {
       internals.clouds.forEach((cloud) => cloud.update());
+    }
+
+    // Camera following carrot's orbital path from distance
+    cameraOrbitAngle += cameraOrbitSpeed;
+
+    // Planet position
+    const planetX = 0,
+      planetY = -50,
+      planetZ = -20;
+
+    // Calculate camera orbital position
+    const cameraX = planetX + Math.cos(cameraOrbitAngle) * cameraOrbitRadius;
+    const cameraY = planetY + cameraHeight;
+    const cameraZ = planetZ + Math.sin(cameraOrbitAngle) * cameraOrbitRadius;
+
+    // Set camera position
+    internals.camera.position.set(cameraX, cameraY, cameraZ);
+
+    // Look at the carrot (following its movement)
+    if (internals.carrot) {
+      internals.camera.lookAt(internals.carrot.mesh.position);
     }
 
     internals.renderer.render(internals.scene, internals.camera);
