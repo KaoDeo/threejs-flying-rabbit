@@ -10,6 +10,7 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   Color,
+  Vector3,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
@@ -94,12 +95,6 @@ function initializeThreeJS() {
   document.body.appendChild(internals.renderer.domElement);
 
   internals.camera.position.set(40, 20, 100);
-  internals.scene.add(internals.camera);
-
-  internals.controls = new OrbitControls(
-    internals.camera,
-    internals.renderer.domElement
-  );
 }
 
 function setupLights() {
@@ -143,14 +138,13 @@ function addElements() {
   });
   internals.scene.add(internals.orbitingPlanet.mesh);
 
-  // Attach camera to the orbiting planet
-  internals.camera.position.set(10, 15, 10); // Above planet surface
-  internals.orbitingPlanet.mesh.add(internals.camera);
+  internals.camera.position.set(35, 5, 0);
+  internals.planet.mesh.add(internals.camera);
 }
 
 function setupRender() {
   internals.render = () => {
-    const time = Date.now() * 0.001; // Current time for animations
+    const time = Date.now() * 0.001;
 
     if (internals.planet) {
       internals.planet.update();
@@ -158,6 +152,13 @@ function setupRender() {
 
     if (internals.orbitingPlanet) {
       internals.orbitingPlanet.update();
+
+      if (internals.camera.parent === internals.planet.mesh) {
+        const orbitingPlanetWorldPos = new Vector3();
+        internals.orbitingPlanet.mesh.getWorldPosition(orbitingPlanetWorldPos);
+
+        internals.camera.lookAt(orbitingPlanetWorldPos);
+      }
 
       if (internals.textMesh) {
         const planetPos = internals.orbitingPlanet.mesh.position;
