@@ -51,22 +51,22 @@ export function loadTextures(textureName) {
   switch (textureName) {
     case "worn-rusted-painted":
       const albedoTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_albedo.png"
+        "./assets/worn-rusted-painted_albedo.png"
       );
       const aoTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_ao.png"
+        "./assets/worn-rusted-painted_ao.png"
       );
       const heightTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_height.png"
+        "./assets/worn-rusted-painted_height.png"
       );
       const metallicTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_metallic.png"
+        "./assets/worn-rusted-painted_metallic.png"
       );
       const normalTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_normal-ogl.png"
+        "./assets/worn-rusted-painted_normal-ogl.png"
       );
       const roughnessTexture = textureLoader.load(
-        "../assets/worn-rusted-painted_roughness.png"
+        "./assets/worn-rusted-painted_roughness.png"
       );
 
       return [
@@ -80,22 +80,22 @@ export function loadTextures(textureName) {
 
     case "peeling-painted-metal": {
       const albedoTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_albedo.png"
+        "./assets/peeling-painted-metal_albedo.png"
       );
       const aoTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_ao.png"
+        "./assets/peeling-painted-metal_ao.png"
       );
       const heightTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_height.png"
+        "./assets/peeling-painted-metal_height.png"
       );
       const metallicTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_metallic.png"
+        "./assets/peeling-painted-metal_metallic.png"
       );
       const normalTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_normal-ogl.png"
+        "./assets/peeling-painted-metal_normal-ogl.png"
       );
       const roughnessTexture = textureLoader.load(
-        "../assets/peeling-painted-metal_roughness.png"
+        "./assets/peeling-painted-metal_roughness.png"
       );
 
       return [
@@ -110,25 +110,25 @@ export function loadTextures(textureName) {
 
     case "wrinkled-paper": {
       const albedoTexture = textureLoader.load(
-        "../assets/wrinkled-paper-albedo.png"
+        "./assets/wrinkled-paper-albedo.png"
       );
 
-      const aoTexture = textureLoader.load("../assets/wrinkled-paper-ao.png");
+      const aoTexture = textureLoader.load("./assets/wrinkled-paper-ao.png");
 
       const heightTexture = textureLoader.load(
-        "../assets/wrinkled-paper-height.png"
+        "./assets/wrinkled-paper-height.png"
       );
 
       const metallicTexture = textureLoader.load(
-        "../assets/wrinkled-paper-metallic.png"
+        "./assets/wrinkled-paper-metalness.png"
       );
 
       const normalTexture = textureLoader.load(
-        "../assets/wrinkled-paper-normal-ogl.png"
+        "./assets/wrinkled-paper-normal-ogl.png"
       );
 
       const roughnessTexture = textureLoader.load(
-        "../assets/wrinkled-paper-roughness.png"
+        "./assets/wrinkled-paper-roughness.png"
       );
 
       return [
