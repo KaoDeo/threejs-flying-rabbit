@@ -12,6 +12,7 @@
     "vite": "^7.0.4"
   },
   "dependencies": {
+    "terser": "^5.43.1",
     "three": "^0.178.0"
   }
 }

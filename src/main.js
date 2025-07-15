@@ -17,6 +17,7 @@ import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 
 import { DIMENSIONS, COLORS } from "./constants/materials.js";
+import { preloadAllTextures, getLoadingProgress } from "./utils/helpers.js";
 
 import { Planet } from "./classes/Planet.js";
 
@@ -24,6 +25,75 @@ const internals = {};
 
 internals.W = DIMENSIONS.W;
 internals.H = DIMENSIONS.H;
+
+function showLoadingProgress() {
+  const loadingDiv = document.createElement("div");
+  loadingDiv.id = "loading-screen";
+  loadingDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+    font-family: Arial, sans-serif;
+  `;
+
+  const progressBar = document.createElement("div");
+  progressBar.style.cssText = `
+    width: 300px;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  `;
+
+  const progressFill = document.createElement("div");
+  progressFill.style.cssText = `
+    height: 100%;
+    background: linear-gradient(90deg, #b7513c, #379351);
+    width: 0%;
+    transition: width 0.3s ease;
+  `;
+
+  const progressText = document.createElement("div");
+  progressText.textContent = "Loading textures...";
+  progressText.style.fontSize = "18px";
+
+  progressBar.appendChild(progressFill);
+  loadingDiv.appendChild(progressBar);
+  loadingDiv.appendChild(progressText);
+  document.body.appendChild(loadingDiv);
+
+  const updateProgress = () => {
+    const progress = getLoadingProgress();
+    progressFill.style.width = `${progress}%`;
+    progressText.textContent = `Loading textures... ${progress.toFixed(1)}%`;
+
+    if (progress < 100) {
+      requestAnimationFrame(updateProgress);
+    }
+  };
+
+  updateProgress();
+
+  return loadingDiv;
+}
+
+function hideLoadingScreen(loadingDiv) {
+  loadingDiv.style.opacity = "0";
+  loadingDiv.style.transition = "opacity 0.5s ease";
+  setTimeout(() => {
+    document.body.removeChild(loadingDiv);
+  }, 500);
+}
 
 function handleText(inputValue) {
   if (inputValue && inputValue.trim() !== "") {
@@ -203,13 +273,24 @@ function setupInteractions() {
   }
 }
 
-function init() {
-  initializeThreeJS();
-  setupLights();
-  createFloor();
-  addElements();
-  setupInteractions();
-  setupRender();
+async function init() {
+  const loadingScreen = showLoadingProgress();
+
+  try {
+    await preloadAllTextures();
+
+    initializeThreeJS();
+    setupLights();
+    createFloor();
+    addElements();
+    setupInteractions();
+    setupRender();
+
+    hideLoadingScreen(loadingScreen);
+  } catch (error) {
+    console.error("Error initializing application:", error);
+    hideLoadingScreen(loadingScreen);
+  }
 }
 
 init();
